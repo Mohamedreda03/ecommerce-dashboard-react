@@ -1,14 +1,18 @@
 import { useEffect } from "react";
+import { RouterProvider } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth.store";
 import { authApi } from "@/api/auth.api";
+import { router } from "@/router";
 import "./App.css";
 
 function App() {
-  const { accessToken, setTokens, setUser, isHydrated } = useAuthStore();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const setUser = useAuthStore((state) => state.setUser);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   useEffect(() => {
+    let mounted = true;
     const initAuth = async () => {
-      // If we don't have an access token, we still mark as hydrated
       if (!accessToken) {
         useAuthStore.setState({ isHydrated: true });
         return;
@@ -16,26 +20,28 @@ function App() {
 
       try {
         const user = await authApi.getMe();
-        setUser(user);
+        if (mounted) {
+          setUser(user);
+        }
       } catch (error) {
         // Validation handled by the interceptor
       } finally {
-        useAuthStore.setState({ isHydrated: true });
+        if (mounted) {
+          useAuthStore.setState({ isHydrated: true });
+        }
       }
     };
 
-    initAuth();
-  }, [accessToken, setUser, setTokens]);
+    if (!isHydrated) {
+      initAuth();
+    }
 
-  if (!isHydrated) {
-    return <div>Loading...</div>; // Will be replaced by router/skeleton logic later
-  }
+    return () => {
+      mounted = false;
+    };
+  }, [accessToken, setUser, isHydrated]);
 
-  return (
-    <div>
-      <h1>Ecommerce Dashboard Setup Active</h1>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

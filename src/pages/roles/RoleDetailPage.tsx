@@ -1,0 +1,1 @@
+export default function RoleDetailPage() { return <div>RoleDetailPage</div> }
