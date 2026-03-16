@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Store, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { appRoutes } from "@/router/routes.config";
 import SidebarItem from "./SidebarItem";
@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const location = useLocation();
 
   // Optionally auto-collapse on small desktop screens
   useEffect(() => {

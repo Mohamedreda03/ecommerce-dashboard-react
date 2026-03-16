@@ -45,7 +45,7 @@ export default function DataTable<T>({
           <TableBody>
             {Array.from({ length: 5 }).map((_, rowIndex) => (
               <TableRow key={`skeleton-row-${rowIndex}`}>
-                {columns.map((col, colIndex) => (
+                {columns.map((_, colIndex) => (
                   <TableCell key={`skeleton-col-${colIndex}`}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>

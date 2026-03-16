@@ -3,7 +3,7 @@ import { authApi } from "./auth.api";
 import { usersApi } from "./users.api";
 import { ordersApi } from "./orders.api";
 import { useAuthStore } from "@/stores/auth.store";
-import { apiClient, baseURL } from "./client";
+import { baseURL } from "./client";
 import { server } from "@/test/mocks/server";
 import { http, HttpResponse } from "msw";
 import { OrderStatus } from "@/types/order.types";

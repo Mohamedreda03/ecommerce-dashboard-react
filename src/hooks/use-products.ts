@@ -124,13 +124,8 @@ export function useRemoveImage() {
   const queryClient = useQueryClient();
   return useMutation({
     // We expect both productId and imageId to be able to invalidate correctly, though API only needs imageId
-    mutationFn: ({
-      productId,
-      imageId,
-    }: {
-      productId: number;
-      imageId: number;
-    }) => productsApi.removeImage(imageId),
+    mutationFn: ({ imageId }: { productId: number; imageId: number }) =>
+      productsApi.removeImage(imageId),
     onSuccess: (_, { productId }) => {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(productId),

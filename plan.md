@@ -348,68 +348,68 @@ src/
 
 ## Phase 8 — Login Page
 
-- [ ] Centered card layout (no sidebar)
-- [ ] React Hook Form + Zod schema: `{ email: z.string().email(), password: z.string().min(8) }`
-- [ ] On submit: call `useLogin()`, on success set store + navigate to `/`
-- [ ] Show field-level validation errors inline
-- [ ] Show toast on API error (invalid credentials)
-- [ ] Redirect to `/` if already authenticated (check on mount)
+- [x] Centered card layout (no sidebar)
+- [x] React Hook Form + Zod schema: `{ email: z.string().email(), password: z.string().min(8) }`
+- [x] On submit: call `useLogin()`, on success set store + navigate to `/`
+- [x] Show field-level validation errors inline
+- [x] Show toast on API error (invalid credentials)
+- [x] Redirect to `/` if already authenticated (check on mount)
 
 ### Phase 8 Tests
 
-- [ ] Form shows inline validation error for a non-email value in the email field
-- [ ] Form shows validation error for a password shorter than 8 characters
-- [ ] Successful login: MSW returns `{ user, accessToken }`, Zustand store is updated, user is redirected to `/`
-- [ ] Failed login (MSW returns 401): Sonner error toast is displayed; user remains on `/login`
-- [ ] Already-authenticated user visiting `/login` is immediately redirected to `/`
+- [x] Form shows inline validation error for a non-email value in the email field
+- [x] Form shows validation error for a password shorter than 8 characters
+- [x] Successful login: MSW returns `{ user, accessToken }`, Zustand store is updated, user is redirected to `/`
+- [x] Failed login (MSW returns 401): Sonner error toast is displayed; user remains on `/login`
+- [x] Already-authenticated user visiting `/login` is immediately redirected to `/`
 
 ## Phase 9 — Dashboard Home
 
-- [ ] Stats row: 4 cards (Total Orders, Total Revenue, Avg Order Value, Orders by Status counts) — data from `GET /orders/admin/stats`
-- [ ] Recent Orders table (last 10 orders with order number, customer, total, status, date)
-- [ ] Orders by Status bar chart using Recharts `BarChart`
-- [ ] Revenue trend section (placeholder if no time-series endpoint exists)
-- [ ] Each card wrapped in `<PermissionGuard permission="read:analytics">` — page redirects via `PermissionGuard` route wrapper
+- [x] Stats row: 4 cards (Total Orders, Total Revenue, Avg Order Value, Orders by Status counts) — data from `GET /orders/admin/stats`
+- [x] Recent Orders table (last 10 orders with order number, customer, total, status, date)
+- [x] Orders by Status bar chart using Recharts `BarChart`
+- [x] Revenue trend section (placeholder if no time-series endpoint exists)
+- [x] Each card wrapped in `<PermissionGuard permission="read:analytics">` — page redirects via `PermissionGuard` route wrapper
 
 ### Phase 9 Tests
 
-- [ ] Stats cards render correct values from MSW-mocked `GET /orders/admin/stats` response
-- [ ] Recharts `BarChart` renders bars for each key in `ordersByStatus`
-- [ ] Recent Orders table renders rows with correct `orderNumber` and `status` from `recentOrders`
-- [ ] User with only CUSTOMER permissions is redirected to `/forbidden` when navigating to `/`
+- [x] Stats cards render correct values from MSW-mocked `GET /orders/admin/stats` response
+- [x] Recharts `BarChart` renders bars for each key in `ordersByStatus`
+- [x] Recent Orders table renders rows with correct `orderNumber` and `status` from `recentOrders`
+- [x] User with only CUSTOMER permissions is redirected to `/forbidden` when navigating to `/`
 
 ## Phase 10 — Users Management
 
 ### Users List (`read:user`)
 
-- [ ] `DataTable` with columns: avatar, name, email, roles badges, status badge, created date, actions
-- [ ] Server-side pagination via `PaginationBar` + `useUsers(query)` React Query hook
-- [ ] `<PermissionGuard permission="create:user">` wraps "New User" button
-- [ ] Row actions: Edit (`update:user`), Delete (`delete:user`), Restore (`update:user` on soft-deleted)
+- [x] `DataTable` with columns: avatar, name, email, roles badges, status badge, created date, actions
+- [x] Server-side pagination via `PaginationBar` + `useUsers(query)` React Query hook
+- [x] `<PermissionGuard permission="create:user">` wraps "New User" button
+- [x] Row actions: Edit (`update:user`), Delete (`delete:user`), Restore (`update:user` on soft-deleted)
 
 ### Create / Edit User (`create:user` / `update:user`)
 
-- [ ] Sheet/Dialog form with Zod validation
-- [ ] Fields: email, firstName, lastName, phone, password (create only), isActive toggle, roleId select (populated from `useRoles()`)
-- [ ] On create: `POST /users` body `{ email, password, firstName, lastName, phone?, roleId?, isActive? }`
-- [ ] On edit: `PATCH /users/:id` body (all optional except at least one field)
+- [x] Sheet/Dialog form with Zod validation
+- [x] Fields: email, firstName, lastName, phone, password (create only), isActive toggle, roleId select (populated from `useRoles()`)
+- [x] On create: `POST /users` body `{ email, password, firstName, lastName, phone?, roleId?, isActive? }`
+- [x] On edit: `PATCH /users/:id` body (all optional except at least one field)
 - [ ] Invalidate `['users']` query on success, show Sonner toast
 
 ### User Detail (`read:user`)
 
-- [ ] Display all user fields, roles list, account status
-- [ ] Assign Role section: select dropdown + `POST /roles/assign` body `{ userId, roleId }` — requires `update:user`
-- [ ] Revoke Role: `POST /roles/revoke` body `{ userId, roleId }` — requires `update:user`
-- [ ] Cannot revoke last role (backend enforces; show error toast)
+- [x] Display all user fields, roles list, account status
+- [x] Assign Role section: select dropdown + `POST /roles/assign` body `{ userId, roleId }` — requires `update:user`
+- [x] Revoke Role: `POST /roles/revoke` body `{ userId, roleId }` — requires `update:user`
+- [x] Cannot revoke last role (backend enforces; show error toast)
 
 ### Phase 10 Tests
 
-- [ ] Users table renders `firstName`, `email`, and roles badges from MSW `GET /users` fixture
-- [ ] "New User" button is absent in the DOM when user lacks `create:user`
-- [ ] Create user form submits `POST /users` with correct body; `['users']` query invalidated; success toast shown
-- [ ] Delete row action opens `ConfirmDialog`; confirming fires `DELETE /users/:id`
-- [ ] Assign role form submits `POST /roles/assign` with `{ userId, roleId }`; user detail refreshes
-- [ ] MSW returning 400 on revoke-last-role shows an error toast and keeps existing roles intact
+- [x] Users table renders `firstName`, `email`, and roles badges from MSW `GET /users` fixture
+- [x] "New User" button is absent in the DOM when user lacks `create:user`
+- [x] Create user form submits `POST /users` with correct body; `['users']` query invalidated; success toast shown
+- [x] Delete row action opens `ConfirmDialog`; confirming fires `DELETE /users/:id`
+- [x] Assign role form submits `POST /roles/assign` with `{ userId, roleId }`; user detail refreshes
+- [x] MSW returning 400 on revoke-last-role shows an error toast and keeps existing roles intact
 
 ## Phase 11 — Roles & Permissions
 
