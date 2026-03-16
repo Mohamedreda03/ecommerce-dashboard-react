@@ -306,45 +306,45 @@ src/
 
 ## Phase 6 — Router & Guards
 
-- [ ] `router/routes.config.ts`: array of `{ path, element, requiredPermission? }` — sidebar config also lives here (label, icon, requiredPermission)
-- [ ] `router/AuthGuard.tsx`: reads `isHydrated` from store; shows skeleton while hydrating; redirects to `/login` if no user; redirects to `/forbidden` if `isAdminUser` is false
-- [ ] `router/PermissionGuard.tsx`: wraps individual pages; accepts `permission: string`; redirects to `/forbidden` if user lacks it
-- [ ] `router/index.tsx`: `createBrowserRouter` with nested routes under `AppLayout` wrapped in `AuthGuard`; `/login` is standalone (no auth required)
-- [ ] Routes: `/login`, `/` (dashboard), `/users`, `/users/:id`, `/roles`, `/roles/:id`, `/products`, `/products/new`, `/products/:id`, `/categories`, `/orders`, `/orders/:id`, `/coupons`, `/reviews`, `/forbidden`, `*` (404)
+- [x] `router/routes.config.ts`: array of `{ path, element, requiredPermission? }` — sidebar config also lives here (label, icon, requiredPermission)
+- [x] `router/AuthGuard.tsx`: reads `isHydrated` from store; shows skeleton while hydrating; redirects to `/login` if no user; redirects to `/forbidden` if `isAdminUser` is false
+- [x] `router/PermissionGuard.tsx`: wraps individual pages; accepts `permission: string`; redirects to `/forbidden` if user lacks it
+- [x] `router/index.tsx`: `createBrowserRouter` with nested routes under `AppLayout` wrapped in `AuthGuard`; `/login` is standalone (no auth required)
+- [x] Routes: `/login`, `/` (dashboard), `/users`, `/users/:id`, `/roles`, `/roles/:id`, `/products`, `/products/new`, `/products/:id`, `/categories`, `/orders`, `/orders/:id`, `/coupons`, `/reviews`, `/forbidden`, `*` (404)
 
 ### Phase 6 Tests
 
-- [ ] `AuthGuard` redirects to `/login` when `isHydrated=true` and `user=null`
-- [ ] `AuthGuard` renders a skeleton while `isHydrated=false`
-- [ ] `AuthGuard` redirects to `/forbidden` when authenticated user has only CUSTOMER permissions (`isAdminUser=false`)
-- [ ] `PermissionGuard` (route) redirects to `/forbidden` when user lacks the required permission
-- [ ] `PermissionGuard` (route) renders `<Outlet>` when user holds the required permission
-- [ ] Visiting `/login` while already authenticated immediately redirects to `/`
+- [x] `AuthGuard` redirects to `/login` when `isHydrated=true` and `user=null`
+- [x] `AuthGuard` renders a skeleton while `isHydrated=false`
+- [x] `AuthGuard` redirects to `/forbidden` when authenticated user has only CUSTOMER permissions (`isAdminUser=false`)
+- [x] `PermissionGuard` (route) redirects to `/forbidden` when user lacks the required permission
+- [x] `PermissionGuard` (route) renders `<Outlet>` when user holds the required permission
+- [x] Visiting `/login` while already authenticated immediately redirects to `/`
 
 ## Phase 7 — Layout & Shared Components
 
-- [ ] `AppLayout.tsx`: flex container — collapsible Sidebar (desktop) + Sheet drawer (mobile) + main content area with Header
-- [ ] `Sidebar.tsx`: logo, nav items filtered by `hasPermission`, active route highlight, collapse toggle
-- [ ] `SidebarItem.tsx`: icon + label + optional badge; renders only if `hasPermission(requiredPermission)`
-- [ ] `Header.tsx`: breadcrumb, user avatar dropdown (Profile, Change Password, Logout)
-- [ ] `DataTable.tsx` (reusable): accepts `columns[]`, `data[]`, `isLoading`, renders Shadcn Table with column sorting header; skeleton rows on loading
-- [ ] `PageHeader.tsx`: title + description + optional action button slot
-- [ ] `ConfirmDialog.tsx`: Shadcn AlertDialog wrapper; accepts `title`, `description`, `onConfirm`, `isLoading`; used for all destructive actions
-- [ ] `StatusBadge.tsx`: maps `OrderStatus` or `isActive` to colored Badge variant
-- [ ] `PaginationBar.tsx`: prev/next + page number buttons; driven by `PaginationMeta`
-- [ ] `ImageUpload.tsx`: drag-and-drop zone using native APIs; calls `useUploadFile`; preview thumbnails; remove button per image; supports multiple
-- [ ] `EmptyState.tsx`: centered icon + message + optional CTA for empty list states
-- [ ] `PermissionGuard.tsx` (shared): `<PermissionGuard permission="create:user"><button>...</button></PermissionGuard>` — renders children only if permitted; used for conditional UI elements (not routes)
+- [x] `AppLayout.tsx`: flex container — collapsible Sidebar (desktop) + Sheet drawer (mobile) + main content area with Header
+- [x] `Sidebar.tsx`: logo, nav items filtered by `hasPermission`, active route highlight, collapse toggle
+- [x] `SidebarItem.tsx`: icon + label + optional badge; renders only if `hasPermission(requiredPermission)`
+- [x] `Header.tsx`: breadcrumb, user avatar dropdown (Profile, Change Password, Logout)
+- [x] `DataTable.tsx` (reusable): accepts `columns[]`, `data[]`, `isLoading`, renders Shadcn Table with column sorting header; skeleton rows on loading
+- [x] `PageHeader.tsx`: title + description + optional action button slot
+- [x] `ConfirmDialog.tsx`: Shadcn AlertDialog wrapper; accepts `title`, `description`, `onConfirm`, `isLoading`; used for all destructive actions
+- [x] `StatusBadge.tsx`: maps `OrderStatus` or `isActive` to colored Badge variant
+- [x] `PaginationBar.tsx`: prev/next + page number buttons; driven by `PaginationMeta`
+- [x] `ImageUpload.tsx`: drag-and-drop zone using native APIs; calls `useUploadFile`; preview thumbnails; remove button per image; supports multiple
+- [x] `EmptyState.tsx`: centered icon + message + optional CTA for empty list states
+- [x] `PermissionGuard.tsx` (shared): `<PermissionGuard permission="create:user"><button>...</button></PermissionGuard>` — renders children only if permitted; used for conditional UI elements (not routes)
 
 ### Phase 7 Tests
 
-- [ ] `PermissionGuard` (shared) renders `children` when `hasPermission` is true; renders nothing when false
-- [ ] `DataTable` renders the correct number of `<tr>` rows matching the `data` prop length
-- [ ] `DataTable` renders Shadcn `Skeleton` rows when `isLoading=true`
-- [ ] `ConfirmDialog` calls `onConfirm` on confirm click; keeps dialog open while `isLoading=true`
-- [ ] `StatusBadge` with `status="DELIVERED"` uses a green variant; `CANCELLED` uses a red variant
-- [ ] `PaginationBar` disables the Previous button on page 1 and Next button on the last page; fires `onPageChange` with the correct page number
-- [ ] `EmptyState` renders the provided `message` prop text
+- [x] `PermissionGuard` (shared) renders `children` when `hasPermission` is true; renders nothing when false
+- [x] `DataTable` renders the correct number of `<tr>` rows matching the `data` prop length
+- [x] `DataTable` renders Shadcn `Skeleton` rows when `isLoading=true`
+- [x] `ConfirmDialog` calls `onConfirm` on confirm click; keeps dialog open while `isLoading=true`
+- [x] `StatusBadge` with `status="DELIVERED"` uses a green variant; `CANCELLED` uses a red variant
+- [x] `PaginationBar` disables the Previous button on page 1 and Next button on the last page; fires `onPageChange` with the correct page number
+- [x] `EmptyState` renders the provided `message` prop text
 
 ## Phase 8 — Login Page
 

@@ -1,4 +1,14 @@
 import { lazy } from "react";
+import {
+  LayoutDashboard,
+  Users,
+  Shield,
+  Package,
+  Tags,
+  ShoppingCart,
+  Ticket,
+  Star,
+} from "lucide-react";
 
 // Pages
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
@@ -20,6 +30,7 @@ const NotFoundPage = lazy(() => import("@/pages/errors/NotFoundPage"));
 export type RouteConfig = {
   path: string;
   label?: string;
+  icon?: React.ElementType;
   element: React.FC;
   requiredPermission?: string;
   hideInSidebar?: boolean;
@@ -29,12 +40,14 @@ export const appRoutes: RouteConfig[] = [
   {
     path: "/",
     label: "Dashboard",
+    icon: LayoutDashboard,
     element: DashboardPage,
     requiredPermission: "read:analytics",
   },
   {
     path: "/users",
     label: "Users",
+    icon: Users,
     element: UsersPage,
     requiredPermission: "read:user",
   },
@@ -47,6 +60,7 @@ export const appRoutes: RouteConfig[] = [
   {
     path: "/roles",
     label: "Roles & Permissions",
+    icon: Shield,
     element: RolesPage,
     requiredPermission: "read:role",
   },
@@ -59,6 +73,7 @@ export const appRoutes: RouteConfig[] = [
   {
     path: "/products",
     label: "Products",
+    icon: Package,
     element: ProductsPage,
     requiredPermission: "read:product",
   },
@@ -77,12 +92,14 @@ export const appRoutes: RouteConfig[] = [
   {
     path: "/categories",
     label: "Categories",
+    icon: Tags,
     element: CategoriesPage,
     requiredPermission: "read:category",
   },
   {
     path: "/orders",
     label: "Orders",
+    icon: ShoppingCart,
     element: OrdersPage,
     requiredPermission: "read:order",
   },
@@ -95,12 +112,14 @@ export const appRoutes: RouteConfig[] = [
   {
     path: "/coupons",
     label: "Coupons",
+    icon: Ticket,
     element: CouponsPage,
     requiredPermission: "read:coupon",
   },
   {
     path: "/reviews",
     label: "Reviews",
+    icon: Star,
     element: ReviewsPage,
     requiredPermission: "read:review",
   },
