@@ -23,6 +23,7 @@ export interface Product {
   isFeatured: boolean;
   categoryId?: number;
   images: ProductImage[];
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -22,6 +22,11 @@ export interface Coupon {
   updatedAt: string;
 }
 
+export interface CouponQuery {
+  page?: number;
+  limit?: number;
+}
+
 export interface CreateCouponPayload {
   code: string;
   discountType: DiscountType;

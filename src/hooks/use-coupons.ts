@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { couponsApi } from "@/api/coupons.api";
-import type { CreateCouponPayload } from "@/types/coupon.types";
+import type { CouponQuery, CreateCouponPayload } from "@/types/coupon.types";
 
 export const couponKeys = {
   all: ["coupons"] as const,
@@ -11,7 +11,7 @@ export const couponKeys = {
   detail: (id: number) => [...couponKeys.details(), id] as const,
 };
 
-export function useCoupons(query: Record<string, any>) {
+export function useCoupons(query: CouponQuery) {
   return useQuery({
     queryKey: couponKeys.list(query),
     queryFn: () => couponsApi.getCoupons(query),

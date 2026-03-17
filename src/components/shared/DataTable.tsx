@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -8,12 +9,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface ColumnDef<T> {
   header: string | ReactNode;
   accessorKey?: keyof T | string;
   cell?: (row: T) => ReactNode;
   className?: string;
+  enableHiding?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -29,13 +40,37 @@ export default function DataTable<T>({
   isLoading,
   emptyMessage = "No results found.",
 }: DataTableProps<T>) {
+  const allColumns = useMemo(
+    () =>
+      columns.map((column, index) => ({
+        ...column,
+        id:
+          typeof column.accessorKey === "string"
+            ? column.accessorKey
+            : `column-${index}`,
+      })),
+    [columns],
+  );
+
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    () =>
+      Object.fromEntries(
+        allColumns.map((column) => [column.id, column.enableHiding !== false]),
+      ),
+  );
+
+  const activeColumns = allColumns.filter((column) => visibleColumns[column.id] !== false);
+  const hideableColumns = allColumns.filter(
+    (column) => typeof column.header === "string" && column.enableHiding !== false,
+  );
+
   if (isLoading) {
     return (
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.map((col, i) => (
+              {activeColumns.map((col, i) => (
                 <TableHead key={i} className={col.className}>
                   {col.header}
                 </TableHead>
@@ -45,7 +80,7 @@ export default function DataTable<T>({
           <TableBody>
             {Array.from({ length: 5 }).map((_, rowIndex) => (
               <TableRow key={`skeleton-row-${rowIndex}`}>
-                {columns.map((_, colIndex) => (
+                {activeColumns.map((_, colIndex) => (
                   <TableCell key={`skeleton-col-${colIndex}`}>
                     <Skeleton className="h-4 w-full" />
                   </TableCell>
@@ -59,11 +94,48 @@ export default function DataTable<T>({
   }
 
   return (
-    <div className="rounded-md border bg-card">
+    <div className="space-y-3">
+      {hideableColumns.length > 0 && (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label="Toggle table columns"
+              >
+                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {hideableColumns.map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  checked={visibleColumns[column.id] !== false}
+                  onCheckedChange={(checked) =>
+                    setVisibleColumns((current) => ({
+                      ...current,
+                      [column.id]: checked === true,
+                    }))
+                  }
+                >
+                  {column.header}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      <div className="rounded-md border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((col, i) => (
+            {activeColumns.map((col, i) => (
               <TableHead key={i} className={col.className}>
                 {col.header}
               </TableHead>
@@ -73,14 +145,14 @@ export default function DataTable<T>({
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={activeColumns.length} className="h-24 text-center">
                 {emptyMessage}
               </TableCell>
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
               <TableRow key={`row-${rowIndex}`}>
-                {columns.map((col, colIndex) => (
+                {activeColumns.map((col, colIndex) => (
                   <TableCell key={`col-${colIndex}`} className={col.className}>
                     {col.cell
                       ? col.cell(row)
@@ -94,6 +166,7 @@ export default function DataTable<T>({
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

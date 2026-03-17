@@ -27,6 +27,11 @@ export const router = createBrowserRouter([
         <route.element />
       </PageSuspense>
     ),
+    errorElement: route.errorElement ? (
+      <PageSuspense>
+        <route.errorElement />
+      </PageSuspense>
+    ) : undefined,
   })),
 
   // Authenticated Routes (AppLayout + AuthGuard)
@@ -52,6 +57,11 @@ export const router = createBrowserRouter([
             path: route.path === "/" ? undefined : route.path,
             index: route.path === "/",
             element: <PageSuspense>{element}</PageSuspense>,
+            errorElement: route.errorElement ? (
+              <PageSuspense>
+                <route.errorElement />
+              </PageSuspense>
+            ) : undefined,
           };
         }),
       },
@@ -66,5 +76,10 @@ export const router = createBrowserRouter([
         <notFoundRoute.element />
       </PageSuspense>
     ),
+    errorElement: notFoundRoute.errorElement ? (
+      <PageSuspense>
+        <notFoundRoute.errorElement />
+      </PageSuspense>
+    ) : undefined,
   },
 ]);

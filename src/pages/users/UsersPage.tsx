@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { useUsers, useDeleteUser, useRestoreUser } from "@/hooks/use-users";
-import { useAuthStore } from "@/stores/auth.store";
 import type { UserSafe } from "@/types/user.types";
 
 import PageHeader from "@/components/shared/PageHeader";
@@ -13,10 +12,12 @@ import PermissionGuard from "@/components/shared/PermissionGuard";
 import DataTable from "@/components/shared/DataTable";
 import PaginationBar from "@/components/shared/PaginationBar";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import FilterToolbar from "@/components/shared/FilterToolbar";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -28,8 +29,9 @@ import UserForm from "./components/UserForm";
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const { data, isLoading } = useUsers({ page, limit: 10 });
-  const { hasPermission } = useAuthStore();
 
   const deleteMutation = useDeleteUser();
   const restoreMutation = useRestoreUser();
@@ -40,10 +42,6 @@ export default function UsersPage() {
 
   // Dialog State
   const [userToDelete, setUserToDelete] = useState<UserSafe | null>(null);
-
-  const canCreate = hasPermission("create:user");
-  const canUpdate = hasPermission("update:user");
-  const canDelete = hasPermission("delete:user");
 
   const openCreateSheet = () => {
     setEditingUser(null);
@@ -75,6 +73,25 @@ export default function UsersPage() {
       toast.error(error?.response?.data?.message || "Failed to restore user");
     }
   };
+
+  const filteredUsers = useMemo(() => {
+    return (data?.data ?? []).filter((user) => {
+      const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim().toLowerCase();
+      const roleNames = (user.roles ?? [])
+        .map((role) => role.role.name.toLowerCase())
+        .join(" ");
+      const matchesSearch =
+        search.trim() === "" ||
+        fullName.includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase()) ||
+        roleNames.includes(search.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" ? user.isActive : !user.isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [data?.data, search, statusFilter]);
 
   const columns = useMemo(() => {
     return [
@@ -145,42 +162,48 @@ export default function UsersPage() {
         header: "Actions",
         cell: (user: UserSafe) => (
           <div className="flex items-center gap-2">
-            {canUpdate && (
+            <PermissionGuard permission="update:user">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => openEditSheet(user)}
                 title="Edit User"
+                aria-label={`Edit user ${user.email}`}
               >
                 <Edit className="h-4 w-4" />
               </Button>
-            )}
-            {canDelete && user.isActive && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={() => setUserToDelete(user)}
-                title="Delete User"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-            {canUpdate && !user.isActive && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRestore(user)}
-                title="Restore User"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
+            </PermissionGuard>
+            {user.isActive ? (
+              <PermissionGuard permission="delete:user">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setUserToDelete(user)}
+                  title="Delete User"
+                  aria-label={`Delete user ${user.email}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </PermissionGuard>
+            ) : (
+              <PermissionGuard permission="update:user">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRestore(user)}
+                  title="Restore User"
+                  aria-label={`Restore user ${user.email}`}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </PermissionGuard>
             )}
           </div>
         ),
       },
     ];
-  }, [canUpdate, canDelete, handleRestore]);
+  }, [handleRestore]);
 
   return (
     <div className="space-y-6">
@@ -197,9 +220,30 @@ export default function UsersPage() {
         }
       />
 
+      <FilterToolbar className="md:grid-cols-2">
+        <Input
+          placeholder="Search users, emails, or roles..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+
+        <select
+          aria-label="User status"
+          className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          value={statusFilter}
+          onChange={(event) =>
+            setStatusFilter(event.target.value as "all" | "active" | "inactive")
+          }
+        >
+          <option value="all">All status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </FilterToolbar>
+
       <DataTable
         columns={columns}
-        data={data?.data || []}
+        data={filteredUsers}
         isLoading={isLoading}
       />
 
@@ -223,13 +267,12 @@ export default function UsersPage() {
 
       {/* Delete Confirmation */}
       <ConfirmDialog
-        isOpen={!!userToDelete}
-        onOpenChange={(isOpen) => !isOpen && setUserToDelete(null)}
+        open={!!userToDelete}
+        onOpenChange={(open) => !open && setUserToDelete(null)}
         title="Delete User"
         description={`Are you sure you want to delete ${userToDelete?.firstName} ${userToDelete?.lastName}? This action will soft-delete the user and block their access.`}
         onConfirm={handleDelete}
-        confirmText="Delete"
-        variant="destructive"
+        isLoading={deleteMutation.isPending}
       />
     </div>
   );

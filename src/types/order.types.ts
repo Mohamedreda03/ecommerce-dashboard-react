@@ -74,6 +74,14 @@ export interface Order {
   };
 }
 
+export interface OrdersAdminQuery {
+  status?: OrderStatus;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface OrderStats {
   totalOrders: number;
   totalRevenue: string;

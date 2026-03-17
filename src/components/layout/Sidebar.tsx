@@ -47,6 +47,7 @@ export default function Sidebar() {
             size="icon"
             className="h-8 w-8"
             onClick={() => setIsCollapsed(true)}
+            aria-label="Collapse sidebar"
           >
             <PanelLeftClose className="h-4 w-4" />
             <span className="sr-only">Collapse Sidebar</span>
@@ -79,6 +80,7 @@ export default function Sidebar() {
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(false)}
+            aria-label="Expand sidebar"
           >
             <PanelLeftOpen className="h-5 w-5" />
             <span className="sr-only">Expand Sidebar</span>

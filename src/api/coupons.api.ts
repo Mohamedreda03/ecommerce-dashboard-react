@@ -1,10 +1,14 @@
 import { apiClient } from "./client";
 import type { PaginatedResponse } from "@/types/api.types";
-import type { Coupon, CreateCouponPayload } from "@/types/coupon.types";
+import type {
+  Coupon,
+  CouponQuery,
+  CreateCouponPayload,
+} from "@/types/coupon.types";
 
 export const couponsApi = {
   async getCoupons(
-    params?: Record<string, any>,
+    params?: CouponQuery,
   ): Promise<PaginatedResponse<Coupon>> {
     const { data } = await apiClient.get<PaginatedResponse<Coupon>>(
       "/coupons",

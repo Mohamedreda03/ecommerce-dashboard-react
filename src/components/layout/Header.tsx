@@ -39,12 +39,17 @@ export default function Header() {
       {/* Mobile Sidebar */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden">
+          <Button
+            size="icon"
+            variant="outline"
+            className="md:hidden"
+            aria-label="Open navigation menu"
+          >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs">
+        <SheetContent side="left" className="max-w-xs">
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               to="/"

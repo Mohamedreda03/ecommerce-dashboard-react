@@ -2,13 +2,14 @@ import { apiClient } from "./client";
 import type { PaginatedResponse } from "@/types/api.types";
 import type {
   Order,
+  OrdersAdminQuery,
   OrderStats,
   UpdateOrderStatusPayload,
 } from "@/types/order.types";
 
 export const ordersApi = {
   async getOrdersAdmin(
-    params?: Record<string, any>,
+    params?: OrdersAdminQuery,
   ): Promise<PaginatedResponse<Order>> {
     const { data } = await apiClient.get<PaginatedResponse<Order>>(
       "/orders/admin",

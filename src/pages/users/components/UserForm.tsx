@@ -34,7 +34,8 @@ const userSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export type UserFormValues = z.infer<typeof userSchema>;
+type UserFormInput = z.input<typeof userSchema>;
+export type UserFormValues = z.output<typeof userSchema>;
 
 interface UserFormProps {
   user?: UserSafe | null;
@@ -52,12 +53,11 @@ export default function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     watch,
     reset,
-    formState: { errors, isSubmitting },
-  } = useForm<UserFormValues>({
+    formState: { errors },
+  } = useForm<UserFormInput, unknown, UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       email: "",

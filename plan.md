@@ -415,159 +415,159 @@ src/
 
 ### Roles List
 
-- [ ] Cards grid: role name, description, permission count badge
-- [ ] "New Role" button guarded by `create:role`
-- [ ] Delete button guarded by `delete:role`; disabled for built-in roles (SUPER_ADMIN, ADMIN, CUSTOMER)
+- [x] Cards grid: role name, description, permission count badge
+- [x] "New Role" button guarded by `create:role`
+- [x] Delete button guarded by `delete:role`; disabled for built-in roles (SUPER_ADMIN, ADMIN, CUSTOMER)
 
 ### Create / Edit Role
 
-- [ ] Name + description fields (Zod: name min 2, max 50)
-- [ ] Permissions checklist: grouped by subject (product, category, order, user, role, review, coupon, analytics); populated from `GET /permissions`
-- [ ] On create: `POST /roles` body `{ name, description?, permissionIds: string[] }`
-- [ ] On edit: `PATCH /roles/:id` body `{ name?, description?, permissionIds: string[] }` — full replace of permissions array
-- [ ] Invalidate `['roles']` on success
+- [x] Name + description fields (Zod: name min 2, max 50)
+- [x] Permissions checklist: grouped by subject (product, category, order, user, role, review, coupon, analytics); populated from `GET /permissions`
+- [x] On create: `POST /roles` body `{ name, description?, permissionIds: string[] }`
+- [x] On edit: `PATCH /roles/:id` body `{ name?, description?, permissionIds: string[] }` - full replace of permissions array
+- [x] Invalidate `['roles']` on success
 
 ### Permissions reference table
 
-- [ ] Read-only table of all permissions grouped by subject, shown below roles list
-- [ ] Data from `GET /permissions` response: `[{ id, action, subject, description }]`
+- [x] Read-only table of all permissions grouped by subject, shown below roles list
+- [x] Data from `GET /permissions` response: `[{ id, action, subject, description }]`
 
 ### Phase 11 Tests
 
-- [ ] Roles list renders a card for each role with name and permission count badge
-- [ ] Delete button is disabled (or absent) for `SUPER_ADMIN`, `ADMIN`, and `CUSTOMER` role names
-- [ ] Permission checklist groups checkboxes by `subject` using data from MSW `GET /permissions`
-- [ ] Create role form submits `POST /roles` with `name`, `description`, and `permissionIds` array
-- [ ] Edit role form pre-checks existing permission IDs; submitting fires `PATCH /roles/:id` with full updated `permissionIds`
+- [x] Roles list renders a card for each role with name and permission count badge
+- [x] Delete button is disabled (or absent) for `SUPER_ADMIN`, `ADMIN`, and `CUSTOMER` role names
+- [x] Permission checklist groups checkboxes by `subject` using data from MSW `GET /permissions`
+- [x] Create role form submits `POST /roles` with `name`, `description`, and `permissionIds` array
+- [x] Edit role form pre-checks existing permission IDs; submitting fires `PATCH /roles/:id` with full updated `permissionIds`
 
 ## Phase 12 — Products Management
 
 ### Products List (`read:product`)
 
-- [ ] `DataTable` columns: image thumbnail, name, SKU, category, price, stock (with low-stock warning badge), status, featured badge, actions
-- [ ] Filter toolbar: search (name/SKU), category select, isActive toggle, isFeatured toggle, price range inputs
-- [ ] Query params: `GET /products/admin/all?search&categoryId&isActive&isFeatured&minPrice&maxPrice&page&limit&sortBy&sortOrder`
-- [ ] "New Product" button — `create:product`
-- [ ] Row actions: Edit, Delete (soft), Restore (if deleted) — with `PermissionGuard`
+- [x] `DataTable` columns: image thumbnail, name, SKU, category, price, stock (with low-stock warning badge), status, featured badge, actions
+- [x] Filter toolbar: search (name/SKU), category select, isActive toggle, isFeatured toggle, price range inputs
+- [x] Query params: `GET /products/admin/all?search&categoryId&isActive&isFeatured&minPrice&maxPrice&page&limit&sortBy&sortOrder`
+- [x] "New Product" button — `create:product`
+- [x] Row actions: Edit, Delete (soft), Restore (if deleted) — with `PermissionGuard`
 
 ### Create / Edit Product
 
-- [ ] Multi-section form (General, Pricing, Inventory, Images)
-- [ ] **General**: name (min 2, max 200), description (textarea), shortDescription (max 500), categoryId (select from `useCategoriesAdmin()`), isActive switch, isFeatured switch
-- [ ] **Pricing**: price (min 0.01), compareAtPrice (optional), costPrice (optional)
-- [ ] **Inventory**: sku (min 2, max 100, unique), stock (int, min 0), lowStockThreshold (int, min 0), weight (optional decimal)
-- [ ] **Images**: `ImageUpload` component; on file select call `POST /files/upload-multiple`; gets back URLs; on form submit include URLs in `POST /products/:id/images` body `{ images: [{url, alt?, sortOrder?}] }`
-- [ ] On create: `POST /products` body as described; on success redirect to edit page
-- [ ] On edit: `PATCH /products/:id`; image reorder via drag-and-drop (call `PATCH /products/:id/images/reorder` body `{ imageIds: string[] }`); remove image via `DELETE /products/images/:imageId`
+- [x] Multi-section form (General, Pricing, Inventory, Images)
+- [x] **General**: name (min 2, max 200), description (textarea), shortDescription (max 500), categoryId (select from `useCategoriesAdmin()`), isActive switch, isFeatured switch
+- [x] **Pricing**: price (min 0.01), compareAtPrice (optional), costPrice (optional)
+- [x] **Inventory**: sku (min 2, max 100, unique), stock (int, min 0), lowStockThreshold (int, min 0), weight (optional decimal)
+- [x] **Images**: `ImageUpload` component; on file select call `POST /files/upload-multiple`; gets back URLs; on form submit include URLs in `POST /products/:id/images` body `{ images: [{url, alt?, sortOrder?}] }`
+- [x] On create: `POST /products` body as described; on success redirect to edit page
+- [x] On edit: `PATCH /products/:id`; image reorder via drag-and-drop (call `PATCH /products/:id/images/reorder` body `{ imageIds: string[] }`); remove image via `DELETE /products/images/:imageId`
 
 ### Stock Management
 
-- [ ] Inline stock editor in list (click to open popover with quantity input + operation select)
-- [ ] `PATCH /products/:id/stock` body `{ quantity: number, operation: 'set'|'increment'|'decrement' }`
+- [x] Inline stock editor in list (click to open popover with quantity input + operation select)
+- [x] `PATCH /products/:id/stock` body `{ quantity: number, operation: 'set'|'increment'|'decrement' }`
 
 ### Phase 12 Tests
 
-- [ ] Products list renders rows from MSW `GET /products/admin/all` fixture
-- [ ] Low-stock warning badge appears when `stock < lowStockThreshold`
-- [ ] Search input is debounced — rapid typing results in only one API call after 300 ms
-- [ ] Product form blocks submission when `name`, `price`, or `sku` is empty
-- [ ] File upload calls `POST /files/upload-multiple`; returned URL appears in the image preview list
-- [ ] Image reorder fires `PATCH /products/:id/images/reorder` with the updated `imageIds` array
+- [x] Products list renders rows from MSW `GET /products/admin/all` fixture
+- [x] Low-stock warning badge appears when `stock < lowStockThreshold`
+- [x] Search input is debounced — rapid typing results in only one API call after 300 ms
+- [x] Product form blocks submission when `name`, `price`, or `sku` is empty
+- [x] File upload calls `POST /files/upload-multiple`; returned URL appears in the image preview list
+- [x] Image reorder fires `PATCH /products/:id/images/reorder` with the updated `imageIds` array
 
 ## Phase 13 — Categories Management
 
-- [ ] List with tree indication (parent → children indented)
-- [ ] Columns: image, name, slug, parent, product count, status, sort order, actions
-- [ ] Create/edit in Sheet: name, description, parentId select (from same list, excluding self), image URL or upload, sortOrder, isActive
-- [ ] `POST /categories` body `{ name, description?, parentId?, image?, sortOrder?, isActive? }`
-- [ ] `DELETE /categories/:id` — warn if category has products; `?force=true` to force delete (backend cascades)
+- [x] List with tree indication (parent → children indented)
+- [x] Columns: image, name, slug, parent, product count, status, sort order, actions
+- [x] Create/edit in Sheet: name, description, parentId select (from same list, excluding self), image URL or upload, sortOrder, isActive
+- [x] `POST /categories` body `{ name, description?, parentId?, image?, sortOrder?, isActive? }`
+- [x] `DELETE /categories/:id` — warn if category has products; `?force=true` to force delete (backend cascades)
 
 ### Phase 13 Tests
 
-- [ ] Category list indents child categories under their parent
-- [ ] `parentId` select excludes the category currently being edited
-- [ ] Create category form submits `POST /categories` with correct body
-- [ ] Force-delete dialog appends `?force=true` to the `DELETE` request when the user confirms
+- [x] Category list indents child categories under their parent
+- [x] `parentId` select excludes the category currently being edited
+- [x] Create category form submits `POST /categories` with correct body
+- [x] Force-delete dialog appends `?force=true` to the `DELETE` request when the user confirms
 
 ## Phase 14 — Orders Management
 
 ### Orders List
 
-- [ ] Filter toolbar: status select (`PENDING|CONFIRMED|PROCESSING|SHIPPED|DELIVERED|CANCELLED|REFUNDED`), date range pickers (dateFrom, dateTo)
-- [ ] Query: `GET /orders/admin?status&dateFrom&dateTo&page&limit`
-- [ ] Columns: order number, customer name/email, total amount, status badge, payment status badge, created date, actions
+- [x] Filter toolbar: status select (`PENDING|CONFIRMED|PROCESSING|SHIPPED|DELIVERED|CANCELLED|REFUNDED`), date range pickers (dateFrom, dateTo)
+- [x] Query: `GET /orders/admin?status&dateFrom&dateTo&page&limit`
+- [x] Columns: order number, customer name/email, total amount, status badge, payment status badge, created date, actions
 
 ### Order Detail
 
-- [ ] Order header: number, dates, status badge
-- [ ] Customer info card
-- [ ] Items table: product name, SKU, qty, unit price, total
-- [ ] Shipping/Billing address snapshots
-- [ ] Payment status card (Stripe payment intent status)
-- [ ] Coupon applied (if any)
-- [ ] Status update select + confirm button — `PATCH /orders/:id/status` body `{ status: OrderStatus }`; only valid transitions shown (PENDING→CONFIRMED→PROCESSING→SHIPPED→DELIVERED, any→CANCELLED where applicable)
-- [ ] Transition map rendered as disabled options for invalid states
+- [x] Order header: number, dates, status badge
+- [x] Customer info card
+- [x] Items table: product name, SKU, qty, unit price, total
+- [x] Shipping/Billing address snapshots
+- [x] Payment status card (Stripe payment intent status)
+- [x] Coupon applied (if any)
+- [x] Status update select + confirm button — `PATCH /orders/:id/status` body `{ status: OrderStatus }`; only valid transitions shown (PENDING→CONFIRMED→PROCESSING→SHIPPED→DELIVERED, any→CANCELLED where applicable)
+- [x] Transition map rendered as disabled options for invalid states
 
 ### Phase 14 Tests
 
-- [ ] Selecting `status=SHIPPED` in the filter toolbar updates the `GET /orders/admin` query param
-- [ ] Date range pickers pass ISO `dateFrom` / `dateTo` strings to the API request
-- [ ] Order detail page renders the items table, shipping address snapshot, and payment status card
-- [ ] Status update select shows only the valid next statuses for the current order status
-- [ ] Options for invalid transitions are rendered as `disabled` select options
+- [x] Selecting `status=SHIPPED` in the filter toolbar updates the `GET /orders/admin` query param
+- [x] Date range pickers pass ISO `dateFrom` / `dateTo` strings to the API request
+- [x] Order detail page renders the items table, shipping address snapshot, and payment status card
+- [x] Status update select shows only the valid next statuses for the current order status
+- [x] Options for invalid transitions are rendered as `disabled` select options
 
 ## Phase 15 — Coupons Management
 
-- [ ] List columns: code, discount type badge, discount value, min order, max uses / used, active status, validity dates, actions
-- [ ] Create/edit Sheet form with Zod validation
-- [ ] Fields: code (uppercase, max 50), discountType (PERCENTAGE | FIXED_AMOUNT radio), discountValue (decimal string), minOrderAmount, maxDiscountAmount, maxUses, isActive switch, startsAt DatePicker, expiresAt DatePicker
-- [ ] `POST /coupons` body `{ code, discountType, discountValue, description?, minOrderAmount?, maxDiscountAmount?, maxUses?, isActive?, startsAt?, expiresAt? }`
-- [ ] Delete only if `currentUses === 0` (backend enforces; surface error toast)
+- [x] List columns: code, discount type badge, discount value, min order, max uses / used, active status, validity dates, actions
+- [x] Create/edit Sheet form with Zod validation
+- [x] Fields: code (uppercase, max 50), discountType (PERCENTAGE | FIXED_AMOUNT radio), discountValue (decimal string), minOrderAmount, maxDiscountAmount, maxUses, isActive switch, startsAt DatePicker, expiresAt DatePicker
+- [x] `POST /coupons` body `{ code, discountType, discountValue, description?, minOrderAmount?, maxDiscountAmount?, maxUses?, isActive?, startsAt?, expiresAt? }`
+- [x] Delete only if `currentUses === 0` (backend enforces; surface error toast)
 
 ### Phase 15 Tests
 
-- [ ] Coupon form validates that `discountValue` is a non-empty decimal string
-- [ ] Selecting `PERCENTAGE` type reveals the `maxDiscountAmount` field; `FIXED_AMOUNT` hides it
-- [ ] `expiresAt` calendar disables dates earlier than the selected `startsAt` value
-- [ ] Submitting the create form posts `POST /coupons` with correct decimal string values
-- [ ] MSW returning 400 on delete (coupon in use) shows an error toast and keeps the row
+- [x] Coupon form validates that `discountValue` is a non-empty decimal string
+- [x] Selecting `PERCENTAGE` type reveals the `maxDiscountAmount` field; `FIXED_AMOUNT` hides it
+- [x] `expiresAt` calendar disables dates earlier than the selected `startsAt` value
+- [x] Submitting the create form posts `POST /coupons` with correct decimal string values
+- [x] MSW returning 400 on delete (coupon in use) shows an error toast and keeps the row
 
 ## Phase 16 — Reviews Moderation
 
-- [ ] Shows pending reviews (`GET /reviews/pending`)
-- [ ] Columns: product name, reviewer (email), rating stars, title, comment excerpt, created date, actions
-- [ ] Approve: `PATCH /reviews/:id/approve` — requires `update:review`
-- [ ] Reject: `PATCH /reviews/:id/reject` — requires `update:review`
-- [ ] Delete: `DELETE /reviews/admin/:id` — requires `delete:review`
-- [ ] Optimistic updates: immediately remove row on action, revert on error
+- [x] Shows pending reviews (`GET /reviews/pending`)
+- [x] Columns: product name, reviewer (email), rating stars, title, comment excerpt, created date, actions
+- [x] Approve: `PATCH /reviews/:id/approve` — requires `update:review`
+- [x] Reject: `PATCH /reviews/:id/reject` — requires `update:review`
+- [x] Delete: `DELETE /reviews/admin/:id` — requires `delete:review`
+- [x] Optimistic updates: immediately remove row on action, revert on error
 
 ### Phase 16 Tests
 
-- [ ] Pending reviews table renders rows from MSW `GET /reviews/pending` fixture
-- [ ] Approving a review optimistically removes its row; MSW 500 response causes the row to reappear
-- [ ] Rejecting a review optimistically removes its row; MSW 500 response causes the row to reappear
-- [ ] Admin delete fires `ConfirmDialog`, then calls `DELETE /reviews/admin/:id` on confirmation
+- [x] Pending reviews table renders rows from MSW `GET /reviews/pending` fixture
+- [x] Approving a review optimistically removes its row; MSW 500 response causes the row to reappear
+- [x] Rejecting a review optimistically removes its row; MSW 500 response causes the row to reappear
+- [x] Admin delete fires `ConfirmDialog`, then calls `DELETE /reviews/admin/:id` on confirmation
 
 ## Phase 17 — Reusable Component Patterns
 
-- [ ] All list pages follow: `PageHeader` + filter toolbar + `DataTable` + `PaginationBar`
-- [ ] All create/edit flows use a Sheet (slide-over) for simple forms, full page for complex forms (product)
-- [ ] All destructive actions go through `ConfirmDialog` before firing mutation
-- [ ] All mutations show `sonner` toast on success and error
-- [ ] All guarded UI elements (buttons, rows, sections) use `<PermissionGuard permission="...">` to hide (not just disable)
-- [ ] Loading states: `DataTable` shows skeleton rows; forms disable submit button; use `isPending` from React Query mutations
-- [ ] Error boundaries on each page route for unexpected errors
+- [x] All list pages follow: `PageHeader` + filter toolbar + `DataTable` + `PaginationBar`
+- [x] All create/edit flows use a Sheet (slide-over) for simple forms, full page for complex forms (product)
+- [x] All destructive actions go through `ConfirmDialog` before firing mutation
+- [x] All mutations show `sonner` toast on success and error
+- [x] All guarded UI elements (buttons, rows, sections) use `<PermissionGuard permission="...">` to hide (not just disable)
+- [x] Loading states: `DataTable` shows skeleton rows; forms disable submit button; use `isPending` from React Query mutations
+- [x] Error boundaries on each page route for unexpected errors
 
 ## Phase 18 — Polish & Performance
 
-- [ ] Route-level code splitting: `React.lazy` + `Suspense` for all page components
-- [ ] TailwindCSS v4 `@layer` organization in `index.css` for base, components, utilities
-- [ ] Optimistic updates for review approve/reject and order status change
-- [ ] `useDebounce` hook for search inputs (300ms) to avoid excessive API calls
-- [ ] Table column visibility toggle (Shadcn `DropdownMenu` for column show/hide)
-- [ ] Accessible: all interactive elements have aria labels; modals trap focus
-- [ ] Responsive: sidebar collapses to Sheet on mobile (< 768px)
-- [ ] Add `.env.example` with `VITE_API_URL=http://localhost:3000/api/v1`
+- [x] Route-level code splitting: `React.lazy` + `Suspense` for all page components
+- [x] TailwindCSS v4 `@layer` organization in `index.css` for base, components, utilities
+- [x] Optimistic updates for review approve/reject and order status change
+- [x] `useDebounce` hook for search inputs (300ms) to avoid excessive API calls
+- [x] Table column visibility toggle (Shadcn `DropdownMenu` for column show/hide)
+- [x] Accessible: all interactive elements have aria labels; modals trap focus
+- [x] Responsive: sidebar collapses to Sheet on mobile (< 768px)
+- [x] Add `.env.example` with `VITE_API_URL=http://localhost:3000/api/v1`
 
 ## Notes & Gotchas
 
@@ -580,3 +580,5 @@ src/
 - **Built-in roles** (SUPER_ADMIN, ADMIN, CUSTOMER) cannot be deleted — backend returns `403`; disable delete button for these in the UI by checking `['SUPER_ADMIN', 'ADMIN', 'CUSTOMER'].includes(role.name)`.
 - **Decimal prices**: backend returns `Decimal` as string (e.g. `"79.99"`); always use `Number(value)` or `parseFloat(value)` when displaying, never direct arithmetic on the string.
 - **Soft delete**: users and products are soft-deleted (`deletedAt` field). Admin lists exclude deleted by default; add a "show deleted" toggle if needed.
+
+

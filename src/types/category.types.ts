@@ -6,9 +6,11 @@ export interface Category {
   slug: string;
   description?: string;
   parentId?: number | null;
+  parent?: Category | null;
   image?: string;
   sortOrder: number;
   isActive: boolean;
+  productCount?: number;
   createdAt: string;
   updatedAt: string;
   children?: Category[];

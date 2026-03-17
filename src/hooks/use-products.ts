@@ -22,10 +22,14 @@ export function useProductsAdmin(query: ProductQuery) {
   });
 }
 
-export function useProductAdmin(id: number) {
+export function useProductAdmin(id?: number) {
   return useQuery({
-    queryKey: productKeys.detail(id),
-    queryFn: () => productsApi.getProductById(id),
+    queryKey:
+      typeof id === "number"
+        ? productKeys.detail(id)
+        : [...productKeys.details(), "new"],
+    queryFn: () => productsApi.getProductById(id as number),
+    enabled: typeof id === "number",
     staleTime: 1000 * 60, // 60s
   });
 }

@@ -26,12 +26,14 @@ const ReviewsPage = lazy(() => import("@/pages/reviews/ReviewsPage"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const ForbiddenPage = lazy(() => import("@/pages/errors/ForbiddenPage"));
 const NotFoundPage = lazy(() => import("@/pages/errors/NotFoundPage"));
+const RouteErrorPage = lazy(() => import("@/pages/errors/RouteErrorPage"));
 
 export type RouteConfig = {
   path: string;
   label?: string;
   icon?: React.ElementType;
   element: React.FC;
+  errorElement?: React.FC;
   requiredPermission?: string;
   hideInSidebar?: boolean;
 };
@@ -42,6 +44,7 @@ export const appRoutes: RouteConfig[] = [
     label: "Dashboard",
     icon: LayoutDashboard,
     element: DashboardPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:analytics",
   },
   {
@@ -49,11 +52,13 @@ export const appRoutes: RouteConfig[] = [
     label: "Users",
     icon: Users,
     element: UsersPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:user",
   },
   {
     path: "/users/:id",
     element: UserDetailPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:user",
     hideInSidebar: true,
   },
@@ -62,11 +67,13 @@ export const appRoutes: RouteConfig[] = [
     label: "Roles & Permissions",
     icon: Shield,
     element: RolesPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:role",
   },
   {
     path: "/roles/:id",
     element: RoleDetailPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:role",
     hideInSidebar: true,
   },
@@ -75,17 +82,20 @@ export const appRoutes: RouteConfig[] = [
     label: "Products",
     icon: Package,
     element: ProductsPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:product",
   },
   {
     path: "/products/new",
     element: ProductFormPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "create:product",
     hideInSidebar: true,
   },
   {
     path: "/products/:id",
     element: ProductFormPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:product",
     hideInSidebar: true,
   },
@@ -94,6 +104,7 @@ export const appRoutes: RouteConfig[] = [
     label: "Categories",
     icon: Tags,
     element: CategoriesPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:category",
   },
   {
@@ -101,11 +112,13 @@ export const appRoutes: RouteConfig[] = [
     label: "Orders",
     icon: ShoppingCart,
     element: OrdersPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:order",
   },
   {
     path: "/orders/:id",
     element: OrderDetailPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:order",
     hideInSidebar: true,
   },
@@ -114,6 +127,7 @@ export const appRoutes: RouteConfig[] = [
     label: "Coupons",
     icon: Ticket,
     element: CouponsPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:coupon",
   },
   {
@@ -121,13 +135,14 @@ export const appRoutes: RouteConfig[] = [
     label: "Reviews",
     icon: Star,
     element: ReviewsPage,
+    errorElement: RouteErrorPage,
     requiredPermission: "read:review",
   },
 ];
 
 export const publicRoutes = [
-  { path: "/login", element: LoginPage },
-  { path: "/forbidden", element: ForbiddenPage },
+  { path: "/login", element: LoginPage, errorElement: RouteErrorPage },
+  { path: "/forbidden", element: ForbiddenPage, errorElement: RouteErrorPage },
 ];
 
-export const notFoundRoute = { path: "*", element: NotFoundPage };
+export const notFoundRoute = { path: "*", element: NotFoundPage, errorElement: RouteErrorPage };

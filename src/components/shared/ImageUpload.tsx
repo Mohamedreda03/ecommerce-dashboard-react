@@ -1,7 +1,7 @@
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import { UploadCloud, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUploadFile } from "@/hooks/use-files";
+import { useUploadFile, useUploadFiles } from "@/hooks/use-files";
 import { cn } from "@/lib/utils";
 
 interface ImageUploadProps {
@@ -17,7 +17,8 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadMutation = useUploadFile();
+  const singleUploadMutation = useUploadFile();
+  const multipleUploadMutation = useUploadFiles();
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -47,23 +48,26 @@ export default function ImageUpload({
     const filesToUpload = multiple ? files : [files[0]];
     if (!filesToUpload[0]) return;
 
-    for (const file of filesToUpload) {
-      try {
-        const result = await uploadMutation.mutateAsync(file);
-        if (multiple) {
-          onChange([...value, result.url]);
-        } else {
-          onChange([result.url]);
-        }
-      } catch (error) {
-        console.error("Failed to upload image", error);
+    try {
+      if (multiple) {
+        const result = await multipleUploadMutation.mutateAsync(filesToUpload);
+        onChange([...value, ...result.urls]);
+        return;
       }
+
+      const result = await singleUploadMutation.mutateAsync(filesToUpload[0]);
+      onChange([result.url]);
+    } catch (error) {
+      console.error("Failed to upload image", error);
     }
   };
 
   const removeImage = (indexToRemove: number) => {
     onChange(value.filter((_, index) => index !== indexToRemove));
   };
+
+  const isPending =
+    singleUploadMutation.isPending || multipleUploadMutation.isPending;
 
   return (
     <div className="space-y-4">
@@ -73,14 +77,12 @@ export default function ImageUpload({
           isDragging
             ? "border-primary bg-primary/10"
             : "border-muted-foreground/25 hover:border-primary/50",
-          uploadMutation.isPending && "opacity-50 cursor-not-allowed",
+          isPending && "opacity-50 cursor-not-allowed",
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() =>
-          !uploadMutation.isPending && fileInputRef.current?.click()
-        }
+        onClick={() => !isPending && fileInputRef.current?.click()}
         role="button"
         tabIndex={0}
       >
@@ -91,9 +93,9 @@ export default function ImageUpload({
           accept="image/*"
           multiple={multiple}
           onChange={handleFileChange}
-          disabled={uploadMutation.isPending}
+          disabled={isPending}
         />
-        {uploadMutation.isPending ? (
+        {isPending ? (
           <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
         ) : (
           <UploadCloud className="h-10 w-10 text-muted-foreground" />
