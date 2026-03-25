@@ -100,7 +100,10 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar} alt={user?.firstName} />
+                <AvatarImage
+                  src={user?.avatar as string}
+                  alt={user?.firstName}
+                />
                 <AvatarFallback>
                   {user?.firstName?.charAt(0) || <User className="h-4 w-4" />}
                 </AvatarFallback>

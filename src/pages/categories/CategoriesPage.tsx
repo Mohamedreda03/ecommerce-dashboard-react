@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Edit, FolderTree, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  useCategoriesAdmin,
-  useDeleteCategory,
-} from "@/hooks/use-categories";
+import { useCategoriesAdmin, useDeleteCategory } from "@/hooks/use-categories";
 import type { Category } from "@/types/category.types";
 import PageHeader from "@/components/shared/PageHeader";
 import PermissionGuard from "@/components/shared/PermissionGuard";
@@ -31,26 +29,36 @@ interface CategoryRow extends Category {
   parentName: string | null;
 }
 
-function buildCategoryTree(categories: Category[]) {
-  const categoryMap = new Map<number, Category & { children: Category[] }>();
+interface CategoryWithChildren extends Category {
+  children: CategoryWithChildren[];
+}
+
+function buildCategoryTree(categories: Category[]): CategoryWithChildren[] {
+  const categoryMap = new Map<number, CategoryWithChildren>();
 
   categories.forEach((category) => {
     categoryMap.set(category.id, { ...category, children: [] });
   });
 
-  const roots: Array<Category & { children: Category[] }> = [];
+  const roots: CategoryWithChildren[] = [];
 
   categoryMap.forEach((category) => {
     if (category.parentId) {
-      categoryMap.get(category.parentId)?.children.push(category);
+      const parent = categoryMap.get(category.parentId);
+      if (parent) {
+        parent.children.push(category);
+      }
       return;
     }
 
     roots.push(category);
   });
 
-  const sortTree = (nodes: Array<Category & { children: Category[] }>) => {
-    nodes.sort((left, right) => left.sortOrder - right.sortOrder || left.name.localeCompare(right.name));
+  const sortTree = (nodes: CategoryWithChildren[]) => {
+    nodes.sort(
+      (left, right) =>
+        left.sortOrder - right.sortOrder || left.name.localeCompare(right.name),
+    );
     nodes.forEach((node) => sortTree(node.children));
   };
 
@@ -59,12 +67,14 @@ function buildCategoryTree(categories: Category[]) {
 }
 
 function flattenCategoryTree(
-  nodes: Array<Category & { children: Category[] }>,
+  nodes: CategoryWithChildren[],
   allCategories: Category[],
   depth = 0,
 ): CategoryRow[] {
   return nodes.flatMap((node) => {
-    const parent = allCategories.find((category) => category.id === node.parentId);
+    const parent = allCategories.find(
+      (category) => category.id === node.parentId,
+    );
 
     const current: CategoryRow = {
       ...node,
@@ -72,13 +82,24 @@ function flattenCategoryTree(
       parentName: parent?.name ?? null,
     };
 
-    return [current, ...flattenCategoryTree(node.children, allCategories, depth + 1)];
+    return [
+      current,
+      ...flattenCategoryTree(node.children, allCategories, depth + 1),
+    ];
   });
 }
 
-function getDescendantIds(categoryId: number, categories: Category[]) {
-  const children = categories.filter((category) => category.parentId === categoryId);
-  return children.flatMap((child) => [child.id, ...getDescendantIds(child.id, categories)]);
+function getDescendantIds(
+  categoryId: number,
+  categories: Category[],
+): number[] {
+  const children = categories.filter(
+    (category) => category.parentId === categoryId,
+  );
+  return children.flatMap((child) => [
+    child.id,
+    ...getDescendantIds(child.id, categories),
+  ]);
 }
 
 export default function CategoriesPage() {
@@ -86,10 +107,13 @@ export default function CategoriesPage() {
   const deleteMutation = useDeleteCategory();
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deleteDialogCategory, setDeleteDialogCategory] = useState<Category | null>(null);
+  const [deleteDialogCategory, setDeleteDialogCategory] =
+    useState<Category | null>(null);
 
   const categoryRows = useMemo(() => {
     if (!categories) return [];
@@ -100,7 +124,9 @@ export default function CategoriesPage() {
         search.trim() === "" ||
         category.name.toLowerCase().includes(search.toLowerCase()) ||
         category.slug.toLowerCase().includes(search.toLowerCase()) ||
-        (category.parentName ?? "").toLowerCase().includes(search.toLowerCase());
+        (category.parentName ?? "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "active" ? category.isActive : !category.isActive);
@@ -113,7 +139,10 @@ export default function CategoriesPage() {
     if (!categories) return [];
 
     const blockedIds = editingCategory
-      ? new Set([editingCategory.id, ...getDescendantIds(editingCategory.id, categories)])
+      ? new Set([
+          editingCategory.id,
+          ...getDescendantIds(editingCategory.id, categories),
+        ])
       : new Set<number>();
 
     return flattenCategoryTree(buildCategoryTree(categories), categories)
@@ -146,150 +175,204 @@ export default function CategoriesPage() {
       });
       toast.success("Category deleted successfully");
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to delete category");
+      toast.error(
+        error?.response?.data?.message || "Failed to delete category",
+      );
     } finally {
       setDeleteDialogCategory(null);
     }
   };
-
   const columns: ColumnDef<CategoryRow>[] = [
     {
-      header: "Image",
-      className: "w-20",
-      cell: (category) =>
-        category.image ? (
-          <img
-            src={category.image}
-            alt={category.name}
-            className="h-12 w-12 rounded-md border object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-md border bg-muted text-xs text-muted-foreground">
-            N/A
-          </div>
-        ),
-    },
-    {
-      header: "Name",
+      header: "Visual",
+      className: "w-24",
       cell: (category) => (
-        <div
-          className="font-medium"
-          style={{ paddingLeft: `${category.depth * 1.5}rem` }}
-        >
-          {category.depth > 0 ? "↳ " : ""}
-          {category.name}
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-surface-low ring-2 ring-white shadow-sm">
+          {category.image ? (
+            <img
+              src={category.image}
+              alt={category.name}
+              className="h-full w-full object-cover transition-transform hover:scale-110"
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-on-surface/20 uppercase tracking-tighter">
+              Null
+            </div>
+          )}
         </div>
       ),
     },
     {
-      header: "Slug",
-      accessorKey: "slug",
+      header: "Taxonomy Node",
+      cell: (category) => (
+        <div
+          className="flex items-center gap-2"
+          style={{ paddingLeft: `${category.depth * 2}rem` }}
+        >
+          {category.depth > 0 && (
+            <div className="w-4 h-px bg-on-surface/20 relative">
+              <div className="absolute top-[-3.5px] right-0 w-2 h-2 rounded-full bg-primary/40" />
+            </div>
+          )}
+          <span
+            className={cn(
+              "font-bold text-sm tracking-tight",
+              category.depth === 0 ? "text-on-surface" : "text-on-surface/70",
+            )}
+          >
+            {category.name}
+          </span>
+        </div>
+      ),
     },
     {
-      header: "Parent",
-      cell: (category) => category.parentName ?? "Root",
+      header: "Identification",
+      cell: (category) => (
+        <code className="text-[10px] font-bold text-on-surface/40 uppercase tracking-widest bg-surface-low px-1.5 py-0.5 rounded">
+          {category.slug}
+        </code>
+      ),
     },
     {
-      header: "Products",
-      cell: (category) => String(category.productCount ?? 0),
+      header: "Census",
+      cell: (category) => (
+        <div className="flex flex-col">
+          <span className="font-bold text-sm">
+            {category.productCount ?? 0}
+          </span>
+          <span className="text-[8px] font-bold uppercase tracking-widest text-on-surface/40">
+            Manifestations
+          </span>
+        </div>
+      ),
     },
     {
       header: "Status",
       cell: (category) => <StatusBadge status={category.isActive} />,
     },
     {
-      header: "Sort Order",
-      cell: (category) => String(category.sortOrder),
-    },
-    {
-      header: "Actions",
-      className: "w-44",
+      header: "",
+      className: "w-20 text-right",
       cell: (category) => (
-        <div className="flex gap-2">
+        <div className="flex justify-end gap-1">
           <PermissionGuard permission="update:category">
-            <Button variant="outline" size="sm" onClick={() => handleEdit(category)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-on-surface/40 hover:text-primary hover:bg-surface-low"
+              onClick={() => handleEdit(category)}
+            >
+              <Edit className="h-3.5 w-3.5" />
             </Button>
           </PermissionGuard>
 
           <PermissionGuard permission="delete:category">
             <Button
-              variant="destructive"
-              size="sm"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-on-surface/40 hover:text-destructive hover:bg-surface-low"
               onClick={() => setDeleteDialogCategory(category)}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </PermissionGuard>
         </div>
       ),
     },
   ];
-
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8 p-4 sm:p-8">
       <PageHeader
-        title="Categories"
-        description="Organize products into parent and child category trees."
+        title="Classification Taxonomy"
+        description="Organize the digital catalog through a logical hierarchy of manifestations."
         action={
           <PermissionGuard permission="create:category">
-            <Button onClick={handleCreate}>
+            <Button
+              onClick={handleCreate}
+              className="shadow-lg shadow-primary/20"
+            >
               <Plus className="mr-2 h-4 w-4" />
-              New Category
+              Define New Category
             </Button>
           </PermissionGuard>
         }
       />
 
-      <FilterToolbar className="md:grid-cols-2">
-        <Input
-          placeholder="Search categories..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+      <div className="grid gap-6">
+        <FilterToolbar className="md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-end gap-4">
+          <div className="lg:col-span-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface/40 mb-2 block ml-1">
+              Search Taxonomy
+            </label>
+            <Input
+              placeholder="Search categorizations..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-10 border-none bg-surface-low/50 text-sm"
+            />
+          </div>
 
-        <select
-          aria-label="Category status"
-          className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          value={statusFilter}
-          onChange={(event) =>
-            setStatusFilter(event.target.value as "all" | "active" | "inactive")
-          }
-        >
-          <option value="all">All status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </FilterToolbar>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface/40 mb-2 block ml-1">
+              Availability State
+            </label>
+            <select
+              aria-label="Category status"
+              className="flex h-10 w-full rounded-lg border-none bg-surface-low/50 px-3 py-1 text-xs font-bold uppercase tracking-wider outline-none transition-all focus:ring-2 focus:ring-primary/20"
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target.value as "all" | "active" | "inactive",
+                )
+              }
+            >
+              <option value="all">Full Spectrum</option>
+              <option value="active">Active Tiers</option>
+              <option value="inactive">Archived Tiers</option>
+            </select>
+          </div>
+        </FilterToolbar>
 
-      {isError ? (
-        <div className="rounded-md bg-destructive/10 p-4 text-destructive">
-          Failed to load categories. Please try again later.
-        </div>
-      ) : !isLoading && categoryRows.length === 0 ? (
-        <EmptyState
-          icon={<FolderTree className="h-10 w-10 text-muted-foreground" />}
-          title="No Categories Found"
-          message="Create your first category to start organizing products."
-          action={
-            <PermissionGuard permission="create:category">
-              <Button variant="outline" onClick={handleCreate}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Category
-              </Button>
-            </PermissionGuard>
-          }
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={categoryRows}
-          isLoading={isLoading}
-          emptyMessage="No categories found."
-        />
-      )}
+        {isError ? (
+          <div className="surface-layer-1 p-10 flex flex-col items-center justify-center text-center">
+            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <FolderTree className="h-6 w-6 text-destructive" />
+            </div>
+            <h3 className="text-lg font-bold">
+              Taxonomy Synchronization Failed
+            </h3>
+            <p className="text-sm text-on-surface/50 max-w-xs mx-auto mt-2">
+              We encountered a disruption while retrieving the categorization
+              hierarchy.
+            </p>
+          </div>
+        ) : !isLoading && categoryRows.length === 0 ? (
+          <EmptyState
+            icon={<FolderTree className="h-12 w-12 text-on-surface/10" />}
+            title="Registry Void"
+            message="The taxonomy is currently unpopulated. Begin the logical structuring of your catalog."
+            action={
+              <PermissionGuard permission="create:category">
+                <Button
+                  variant="outline"
+                  onClick={handleCreate}
+                  className="border-on-surface/10 hover:bg-surface-low"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Initialize Category
+                </Button>
+              </PermissionGuard>
+            }
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={categoryRows}
+            isLoading={isLoading}
+            emptyMessage="No categorizations match the current filter parameters."
+          />
+        )}
+      </div>
 
       <Sheet
         open={isFormOpen}
@@ -300,28 +383,32 @@ export default function CategoriesPage() {
           }
         }}
       >
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
-          <SheetHeader className="mb-6">
-            <SheetTitle>{editingCategory ? "Edit Category" : "Create Category"}</SheetTitle>
-            <SheetDescription>
-              {editingCategory
-                ? `Update settings for ${editingCategory.name}.`
-                : "Create a new category and place it in the tree."}
-            </SheetDescription>
-          </SheetHeader>
+        <SheetContent className="sm:max-w-xl glass-effect border-none shadow-2xl p-0">
+          <div className="p-10 flex flex-col h-full bg-surface-layer-1">
+            <SheetHeader className="mb-10 text-left">
+              <SheetTitle className="text-3xl font-bold tracking-tight">
+                {editingCategory ? "Refine Classification" : "Initialize Tier"}
+              </SheetTitle>
+              <SheetDescription className="text-xs font-medium text-on-surface/40 uppercase tracking-widest">
+                {editingCategory
+                  ? `Adjusting the parameters for ${editingCategory.name}.`
+                  : "Structure a new logical node within the catalog hierarchy."}
+              </SheetDescription>
+            </SheetHeader>
 
-          <CategoryForm
-            category={editingCategory}
-            parentOptions={parentOptions}
-            onSuccess={() => {
-              setIsFormOpen(false);
-              setEditingCategory(null);
-            }}
-            onCancel={() => {
-              setIsFormOpen(false);
-              setEditingCategory(null);
-            }}
-          />
+            <CategoryForm
+              category={editingCategory}
+              parentOptions={parentOptions}
+              onSuccess={() => {
+                setIsFormOpen(false);
+                setEditingCategory(null);
+              }}
+              onCancel={() => {
+                setIsFormOpen(false);
+                setEditingCategory(null);
+              }}
+            />
+          </div>
         </SheetContent>
       </Sheet>
 
@@ -330,13 +417,13 @@ export default function CategoriesPage() {
         onOpenChange={(open) => !open && setDeleteDialogCategory(null)}
         title={
           (deleteDialogCategory?.productCount ?? 0) > 0
-            ? "Force Delete Category"
-            : "Delete Category"
+            ? "Dissolve Populated Tier"
+            : "Dissolve Category"
         }
         description={
           (deleteDialogCategory?.productCount ?? 0) > 0
-            ? `The "${deleteDialogCategory?.name}" category contains products. Confirming will force delete it and cascade to related records.`
-            : `Are you sure you want to delete "${deleteDialogCategory?.name}"?`
+            ? `The "${deleteDialogCategory?.name}" classification contains active manifestations. Dissolving this tier will cascade all related catalog entries.`
+            : `Are you sure you want to dissolve "${deleteDialogCategory?.name}" from the taxonomy?`
         }
         onConfirm={handleDelete}
         isLoading={deleteMutation.isPending}
