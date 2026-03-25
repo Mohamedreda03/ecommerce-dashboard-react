@@ -40,3 +40,11 @@ export interface UpdateUserPayload {
   roleId?: number;
   password?: string;
 }
+
+export interface UserQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  roleId?: number;
+  isActive?: boolean;
+}

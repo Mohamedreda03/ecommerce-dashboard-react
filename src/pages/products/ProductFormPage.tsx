@@ -16,6 +16,7 @@ import {
 } from "@/hooks/use-products";
 import { useCategoriesAdmin } from "@/hooks/use-categories";
 import type { ProductImage } from "@/types/product.types";
+import type { ApiError } from "@/types/api.types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,8 +151,12 @@ export default function ProductFormPage() {
       weight: product.weight || "",
       images: [],
     });
-    setExistingImages(product.images ?? []);
-  }, [isEditing, product, reset]);
+
+    const productImages = product.images ?? [];
+    if (JSON.stringify(existingImages) !== JSON.stringify(productImages)) {
+      setExistingImages(productImages);
+    }
+  }, [isEditing, product, reset, existingImages]);
 
   const handleRemoveExistingImage = async (image: ProductImage) => {
     if (!productId) return;
@@ -160,8 +165,9 @@ export default function ProductFormPage() {
       await removeImageMutation.mutateAsync({ productId, imageId: image.id });
       setExistingImages((current) => current.filter((entry) => entry.id !== image.id));
       toast.success("Image removed successfully");
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to remove image");
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message || "Failed to remove image");
     }
   };
 
@@ -181,9 +187,10 @@ export default function ProductFormPage() {
         data: { imageIds: nextImages.map((image) => image.id) },
       });
       toast.success("Image order updated");
-    } catch (error: any) {
+    } catch (error) {
       setExistingImages(existingImages);
-      toast.error(error?.response?.data?.message || "Failed to reorder images");
+      const apiError = error as ApiError;
+      toast.error(apiError.message || "Failed to reorder images");
     }
   };
 
@@ -229,8 +236,9 @@ export default function ProductFormPage() {
       }
 
       navigate(`/products/${currentProductId}`);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "An error occurred");
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message || "An error occurred");
     }
   };
 

@@ -1,13 +1,24 @@
 // src/types/auth.types.ts
 
+export interface AuthRole {
+  role: {
+    id?: number;
+    name: string;
+  };
+}
+
 export interface AuthUser {
-  id: number;
+  id: string | number;
   email: string;
   firstName?: string;
   lastName?: string;
-  avatar?: string;
-  roles: string[];
-  permissions: string[];
+  avatar?: string | null;
+  phone?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  roles: AuthRole[];
+  permissions?: string[]; // permissions come from the JWT if not directly on the user object
 }
 
 export interface LoginCredentials {

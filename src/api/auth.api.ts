@@ -5,13 +5,19 @@ import type {
   AuthUser,
 } from "@/types/auth.types";
 
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  timestamp: string;
+}
+
 export const authApi = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const { data } = await apiClient.post<LoginResponse>(
-      "/auth/login",
+    const { data: response } = await apiClient.post<ApiResponse<LoginResponse>>(
+      "/auth/dashboard/login",
       credentials,
     );
-    return data;
+    return response.data;
   },
 
   async logout(): Promise<void> {
@@ -19,14 +25,14 @@ export const authApi = {
   },
 
   async refreshToken(): Promise<{ accessToken: string }> {
-    const { data } = await apiClient.post<{ accessToken: string }>(
+    const { data: response } = await apiClient.post<ApiResponse<{ accessToken: string }>>(
       "/auth/refresh",
     );
-    return data;
+    return response.data;
   },
 
   async getMe(): Promise<AuthUser> {
-    const { data } = await apiClient.get<AuthUser>("/auth/me");
-    return data;
+    const { data: response } = await apiClient.get<ApiResponse<AuthUser>>("/auth/me");
+    return response.data;
   },
 };

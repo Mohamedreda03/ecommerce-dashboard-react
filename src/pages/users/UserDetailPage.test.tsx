@@ -33,11 +33,14 @@ describe("UserDetailPage Phase 10", () => {
     queryClient.clear();
     useAuthStore.setState({
       user: {
-        id: 1,
+        id: "1",
         email: "test@example.com",
         firstName: "Test",
         lastName: "Admin",
-        roles: ["Admin"],
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        roles: [{ role: { name: "SUPER_ADMIN" } }],
         permissions: ["manage:all"],
       },
       accessToken: "fake-jwt-token",

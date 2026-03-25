@@ -75,11 +75,12 @@ export default function UsersPage() {
   };
 
   const filteredUsers = useMemo(() => {
-    return (data?.data ?? []).filter((user) => {
+    const usersList = Array.isArray(data?.data) ? data.data : [];
+    return usersList.filter((user) => {
       const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim().toLowerCase();
-      const roleNames = (user.roles ?? [])
-        .map((role) => role.role.name.toLowerCase())
-        .join(" ");
+      const roleNames = Array.isArray(user.roles) 
+        ? user.roles.map((role) => role.role?.name?.toLowerCase() || "").join(" ")
+        : "";
       const matchesSearch =
         search.trim() === "" ||
         fullName.includes(search.toLowerCase()) ||

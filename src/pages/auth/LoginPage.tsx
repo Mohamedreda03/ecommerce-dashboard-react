@@ -48,12 +48,25 @@ export default function LoginPage() {
 
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (responseData) => {
+        // Correctly set token first, then user, so the store can merge permissions
+        useAuthStore.getState().setTokens(responseData.accessToken);
+        useAuthStore.getState().setUser(responseData.user);
+        
+        const hasAccess = useAuthStore.getState().hasPermission("access:dashboard");
+        
+        if (!hasAccess) {
+          useAuthStore.getState().clearAuth();
+          toast.error("Forbidden: You do not have permission to access the dashboard.");
+          return;
+        }
+
         toast.success("Logged in successfully");
         navigate("/");
       },
       onError: (error: any) => {
-        toast.error(error?.response?.data?.message || "Invalid credentials");
+        const message = error?.message || "Invalid credentials";
+        toast.error(message);
       },
     });
   };
@@ -67,9 +80,9 @@ export default function LoginPage() {
               <Store className="h-6 w-6" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            Access the e-commerce control panel
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -94,9 +107,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" {...register("password")} />
               {errors.password && (
                 <p className="text-sm font-medium text-destructive">
@@ -113,10 +124,10 @@ export default function LoginPage() {
               {loginMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  Authenticating...
                 </>
               ) : (
-                "Sign in"
+                "Sign in to Dashboard"
               )}
             </Button>
           </form>

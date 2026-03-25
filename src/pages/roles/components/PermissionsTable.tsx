@@ -26,17 +26,20 @@ const SUBJECT_ORDER = [
 ] as const;
 
 function groupPermissionsBySubject(permissions: Permission[] = []) {
-  return permissions.reduce<Record<string, Permission[]>>((acc, permission) => {
-    if (!acc[permission.subject]) {
-      acc[permission.subject] = [];
+  const perms = Array.isArray(permissions) ? permissions : [];
+  return perms.reduce<Record<string, Permission[]>>((acc, permission) => {
+    const subject = permission?.subject || "unknown";
+    if (!acc[subject]) {
+      acc[subject] = [];
     }
-    acc[permission.subject].push(permission);
+    acc[subject].push(permission);
     return acc;
   }, {});
 }
 
 function sortSubjects(subjects: string[]) {
-  return [...subjects].sort((left, right) => {
+  const validSubjects = Array.isArray(subjects) ? subjects : [];
+  return [...validSubjects].sort((left, right) => {
     const leftIndex = SUBJECT_ORDER.indexOf(left as (typeof SUBJECT_ORDER)[number]);
     const rightIndex = SUBJECT_ORDER.indexOf(right as (typeof SUBJECT_ORDER)[number]);
     const normalizedLeft = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;

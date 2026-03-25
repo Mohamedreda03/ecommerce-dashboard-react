@@ -40,7 +40,11 @@ export const router = createBrowserRouter([
     element: <AuthGuard />,
     children: [
       {
-        element: <AppLayout />,
+        element: (
+          <PermissionGuard permission="access:dashboard">
+            <AppLayout />
+          </PermissionGuard>
+        ),
         children: appRoutes.map((route) => {
           const PageComponent = route.element;
 

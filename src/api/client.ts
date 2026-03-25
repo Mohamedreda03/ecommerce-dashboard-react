@@ -6,7 +6,7 @@ export const baseURL =
 
 export const apiClient = axios.create({
   baseURL,
-  withCredentials: true, // Needed for cookie-based refresh token
+  withCredentials: true, // Needed for HTTP-only refresh cookies from NestJS
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,40 +27,37 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Trigger refresh on 401, but NOT on the dashboard login route itself
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      originalRequest.url !== "/auth/login"
+      !originalRequest.url?.includes("/auth/dashboard/login")
     ) {
       originalRequest._retry = true;
 
       try {
-        // Call refresh endpoint directly using a new axios instance or plain axios
-        // to prevent infinite interceptor loops if /auth/refresh itself returns 401
+        // Backend reads the HTTP-only refresh cookie automatically
         const res = await axios.post(
           `${baseURL}/auth/refresh`,
           {},
-          {
-            withCredentials: true,
-          },
+          { withCredentials: true },
         );
 
         const newAccessToken = res.data.accessToken;
         useAuthStore.getState().setTokens(newAccessToken);
 
-        // Retry the original request with the new token
+        // Retry with the fresh token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // On second 401 (refresh failed), clear store and redirect
+        // On refresh failure, clear store and force login
         useAuthStore.getState().clearAuth();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
 
-    // Surface a structured error object on non-2xx responses
     return Promise.reject(error.response?.data || error);
   },
 );

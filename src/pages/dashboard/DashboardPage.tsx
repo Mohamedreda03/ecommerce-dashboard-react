@@ -47,16 +47,21 @@ export default function DashboardPage() {
   }
 
   const {
-    totalOrders,
-    totalRevenue,
-    averageOrderValue,
-    ordersByStatus,
-    recentOrders,
-  } = stats;
+    totalOrders = 0,
+    totalRevenue = 0,
+    averageOrderValue = 0,
+    ordersByStatus = {},
+    recentOrders = [],
+  } = stats || {};
 
-  const chartData = Object.entries(ordersByStatus).map(([status, count]) => ({
+  const safeNumber = (val: any) => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const chartData = Object.entries(ordersByStatus || {}).map(([status, count]) => ({
     name: status,
-    count,
+    count: safeNumber(count),
   }));
 
   return (
@@ -73,7 +78,7 @@ export default function DashboardPage() {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalOrders}</div>
+              <div className="text-2xl font-bold">{safeNumber(totalOrders)}</div>
             </CardContent>
           </Card>
 
@@ -87,7 +92,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">
                 $
-                {Number(totalRevenue).toLocaleString(undefined, {
+                {safeNumber(totalRevenue).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -105,7 +110,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">
                 $
-                {Number(averageOrderValue).toLocaleString(undefined, {
+                {safeNumber(averageOrderValue).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -122,11 +127,11 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {ordersByStatus.DELIVERED || 0}
+                {safeNumber(ordersByStatus?.DELIVERED)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {ordersByStatus.PENDING || 0} pending,{" "}
-                {ordersByStatus.PROCESSING || 0} processing
+                {safeNumber(ordersByStatus?.PENDING)} pending,{" "}
+                {safeNumber(ordersByStatus?.PROCESSING)} processing
               </p>
             </CardContent>
           </Card>
@@ -139,8 +144,8 @@ export default function DashboardPage() {
               <CardTitle>Orders by Status</CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[300px] w-full min-w-0">
+                <ResponsiveContainer width="99%" height={300}>
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis
@@ -192,7 +197,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="ml-auto font-medium space-x-2 flex items-center">
                       <Badge variant="outline">{order.status}</Badge>
-                      <span>${Number(order.totalAmount).toFixed(2)}</span>
+                      <span>${safeNumber(order.totalAmount).toFixed(2)}</span>
                     </div>
                   </div>
                 ))}

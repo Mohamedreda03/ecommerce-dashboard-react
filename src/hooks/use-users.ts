@@ -1,17 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/api/users.api";
-import type { CreateUserPayload, UpdateUserPayload } from "@/types/user.types";
+import type {
+  CreateUserPayload,
+  UpdateUserPayload,
+  UserQuery,
+} from "@/types/user.types";
 
 export const userKeys = {
   all: ["users"] as const,
   lists: () => [...userKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
-    [...userKeys.lists(), filters] as const,
+  list: (filters: UserQuery) => [...userKeys.lists(), filters] as const,
   details: () => [...userKeys.all, "detail"] as const,
   detail: (id: number) => [...userKeys.details(), id] as const,
 };
 
-export function useUsers(query: Record<string, any>) {
+export function useUsers(query: UserQuery) {
   return useQuery({
     queryKey: userKeys.list(query),
     queryFn: () => usersApi.getUsers(query),

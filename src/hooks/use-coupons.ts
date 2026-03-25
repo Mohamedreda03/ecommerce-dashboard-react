@@ -5,10 +5,8 @@ import type { CouponQuery, CreateCouponPayload } from "@/types/coupon.types";
 export const couponKeys = {
   all: ["coupons"] as const,
   lists: () => [...couponKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
-    [...couponKeys.lists(), filters] as const,
-  details: () => [...couponKeys.all, "detail"] as const,
-  detail: (id: number) => [...couponKeys.details(), id] as const,
+  list: (filters: CouponQuery) => [...couponKeys.lists(), filters] as const,
+  details: () => [...couponKeys.all, "detail"] as const,  detail: (id: number) => [...couponKeys.details(), id] as const,
 };
 
 export function useCoupons(query: CouponQuery) {

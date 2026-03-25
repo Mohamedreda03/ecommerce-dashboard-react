@@ -9,10 +9,13 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(amount: number | string): string {
   const numericAmount =
     typeof amount === "string" ? parseFloat(amount) : amount;
+  
+  const safeAmount = isNaN(numericAmount) ? 0 : numericAmount;
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-  }).format(numericAmount);
+  }).format(safeAmount);
 }
 
 export function formatDate(date: string | Date | number): string {

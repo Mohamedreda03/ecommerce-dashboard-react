@@ -23,7 +23,7 @@ function App() {
         if (mounted) {
           setUser(user);
         }
-      } catch (error) {
+      } catch {
         // Validation handled by the interceptor
       } finally {
         if (mounted) {

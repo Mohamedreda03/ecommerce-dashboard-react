@@ -11,10 +11,9 @@ export const orderKeys = {
   all: ["orders"] as const,
   adminAll: () => [...orderKeys.all, "admin"] as const,
   lists: () => [...orderKeys.adminAll(), "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: OrdersAdminQuery) =>
     [...orderKeys.lists(), filters] as const,
-  details: () => [...orderKeys.all, "detail"] as const,
-  detail: (id: number) => [...orderKeys.details(), id] as const,
+  details: () => [...orderKeys.all, "detail"] as const,  detail: (id: number) => [...orderKeys.details(), id] as const,
   stats: () => [...orderKeys.adminAll(), "stats"] as const,
 };
 
